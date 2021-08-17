@@ -1,10 +1,10 @@
 import React from 'react';
 
-function Persons({List}) {
+function Persons({List, handleDelete}) {
     return (
         <>
          {List.map((person) => 
-            <p key={person.name} >{person.name} {person.number}</p>
+            <p key={person.id} >{person.name} {person.number} <button onClick={() => handleDelete(person.name,person.id)}>delete</button></p>
         )}   
         </>
     );
