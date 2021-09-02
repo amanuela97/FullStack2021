@@ -27,7 +27,7 @@ const App = () => {
       const exists = persons.filter( p => p.name === newName).length > 0
       if(exists) {
         if(window.confirm(`${newName} is already added to phonebook, replace the old number with the new one ?`)){
-          const personToUpdate = persons.find( p => p.name = newName)
+          const personToUpdate = persons.find( p => p.name === newName)
           update(personToUpdate.id, {...personToUpdate, number: newNumber})
           .then(updatedPerson => {
             setPersons(persons.map(p => (p.name === newName ? updatedPerson : p)))
