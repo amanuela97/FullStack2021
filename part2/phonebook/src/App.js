@@ -38,9 +38,9 @@ const App = () => {
             setNewName('')
             setNewNumber('')
           }).catch(error => {
-            console.log(error)
+            console.log(error.message)
             setErrorMessage({
-              message: 'update failed',
+              message: error.response.data.error,
               state: true 
             })
           }).finally(() => setDefaultError())
@@ -63,9 +63,9 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       }).catch(error => {
-        console.log(error);
+        console.log(error.message);
         setErrorMessage({
-          message: "Adding person failed",
+          message: error.response.data.error,
           state: true
         })
       }).finally(() => setDefaultError())
