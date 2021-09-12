@@ -2,9 +2,12 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const testHelper = require('./test_helper')
+const bcrypt = require('bcrypt')
 
 const api = supertest(app)
+let token
 
 beforeEach( async () => {
   await Blog.deleteMany({})
@@ -12,6 +15,16 @@ beforeEach( async () => {
   const blogs = testHelper.initialBlogs.map(blog => new Blog (blog))
   const saveBlogs = blogs.map(blog => blog.save())
   await Promise.all(saveBlogs)
+
+  // add user for authorization test
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash('tests', 10)
+  const user = new User({ username: 'admin', name: 'admin', passwordHash })
+  await user.save()
+  const res = await api
+    .post('/api/login')
+    .send({ username: 'admin', name: 'admin', password: 'tests' })
+  token = res.body.token
 }, 100000)
 
 describe('when there is initially some blogs saved', () => {
@@ -43,7 +56,7 @@ describe('when there is initially some blogs saved', () => {
   })
 })
 
-describe('viewing a specific note', () => {
+describe('viewing a specific blog', () => {
   test('succeeds with a valid id', async () => {
     const notesAtStart = await testHelper.blogsInDb()
 
@@ -82,22 +95,40 @@ describe('transforming _id to id with toJSON', () => {
 })
 
 describe('verifying saved blogs', () => {
-  test('a blog is succefully added to database', async () => {
+  test('a blog is succefully added to database if authorized', async () => {
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(testHelper.testBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
     const blogs = await testHelper.blogsInDb()
-    blogs.forEach(blog => delete blog.id)
-    expect(blogs).toContainEqual(testHelper.testBlog)
+    const blogsTitle = blogs.map( b => b.title)
+    expect(blogsTitle).toContain(testHelper.testBlog.title)
     expect(blogs).toHaveLength(testHelper.initialBlogs.length + 1)
   })
+
+  test('a blog added to database by unauthorized user fails', async () => {
+    const res = await api
+      .post('/api/blogs')
+      .send(testHelper.testBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+
+    const blogs = await testHelper.blogsInDb()
+    blogs.forEach(blog => delete blog.id)
+    const blogsTitle = blogs.map( b => b.title)
+    expect(blogs).toHaveLength(testHelper.initialBlogs.length)
+    expect(res.body.error).toContain('invalid token')
+    expect(blogsTitle).not.toContain(testHelper.testBlog.title)
+  })
+
   test('likes default to 0 if not provided', async () => {
     delete testHelper.testBlog.likes
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(testHelper.testBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -110,6 +141,7 @@ describe('verifying saved blogs', () => {
     delete testHelper.testBlog.url
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(testHelper.testBlog)
       .expect(400)
     const blogs = await testHelper.blogsInDb()
@@ -120,6 +152,7 @@ describe('verifying saved blogs', () => {
     delete testHelper.testBlog.title
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(testHelper.testBlog)
       .expect(400)
     const blogs = await testHelper.blogsInDb()
@@ -128,16 +161,41 @@ describe('verifying saved blogs', () => {
 })
 
 describe('deletion of a blog', () => {
-  test('status code 204 if successfully deleted', async () => {
-    const blogsAtStart = await testHelper.blogsInDb()
-    const deletedBlog = blogsAtStart[0]
-    await api
-      .delete(`/api/blogs/${deletedBlog.id}`)
-      .expect(204)
+  test('deletion succeeds with status code 204 if authorized', async () => {
+    const testB = await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(testHelper.blogToBeDeleted)
+      .expect(201)
 
     const currentState = await testHelper.blogsInDb()
-    expect(currentState).toHaveLength(testHelper.initialBlogs.length - 1)
-    expect(currentState).not.toContainEqual(deletedBlog)
+
+    await api
+      .delete(`/api/blogs/${testB.body.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204)
+
+    const finalState = await testHelper.blogsInDb()
+    const blogTitles = finalState.map(b => b.title)
+    expect(finalState).toHaveLength(currentState.length - 1)
+    expect(blogTitles).not.toContain(testB.body.title)
+  })
+  test('deletion fails with status code 401 if unauthorized', async () => {
+    const testB = await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(testHelper.blogToBeDeleted)
+      .expect(201)
+
+    const currentState = await testHelper.blogsInDb()
+    await api
+      .delete(`/api/blogs/${testB.body.id}`)
+      .expect(401)
+
+    const finalState = await testHelper.blogsInDb()
+    const blogTitles = finalState.map(b => b.title)
+    expect(finalState).toHaveLength(currentState.length)
+    expect(blogTitles).toContain(testB.body.title)
   })
 })
 
@@ -162,12 +220,13 @@ describe('updating a specific blog', () => {
   test('updating with invalid id results in status code 400', async () => {
     const initialState = await testHelper.blogsInDb()
     const newLikes = { likes: 20 }
-    await api
+    const res = await api
       .put('/api/blogs/12432kdkd')
       .send(newLikes)
       .expect(400)
 
     const currentState = await testHelper.blogsInDb()
+    expect(res.body.error).toContain('malformatted id')
     expect(currentState).toEqual(initialState)
   })
 })
