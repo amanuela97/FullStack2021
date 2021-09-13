@@ -19,11 +19,11 @@ beforeEach( async () => {
   // add user for authorization test
   await User.deleteMany({})
   const passwordHash = await bcrypt.hash('tests', 10)
-  const user = new User({ username: 'admin', name: 'admin', passwordHash })
+  const user = new User({ username: 'test', name: 'test', passwordHash })
   await user.save()
   const res = await api
     .post('/api/login')
-    .send({ username: 'admin', name: 'admin', password: 'tests' })
+    .send({ username: 'test', name: 'test', password: 'tests' })
   token = res.body.token
 }, 100000)
 
