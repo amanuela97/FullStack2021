@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import PropTypes from 'prop-types'
 const Blog = ({ blog, blogUpdate, blogRemove, loggedUser }) => {
   const blogStyle = {
     paddingTop: 10,
@@ -11,7 +12,7 @@ const Blog = ({ blog, blogUpdate, blogRemove, loggedUser }) => {
   let lable = blogVisible ? 'hide' : 'view'
   return (
     <div style={blogStyle}>
-      {blog.title} {blog.author} <button onClick={() => setBlogVisible(!blogVisible)}>{lable}</button>
+      {blog.title} {blog.author} <button className='toggle' onClick={() => setBlogVisible(!blogVisible)}>{lable}</button>
       {blogVisible &&
       <div>
         <a href={blog.url}>{blog.url}</a>
@@ -28,6 +29,13 @@ const Blog = ({ blog, blogUpdate, blogRemove, loggedUser }) => {
       </div>}
     </div>
   )
+}
+
+Blog.propTypes = {
+  blog: PropTypes.object.isRequired,
+  loggedUser: PropTypes.object.isRequired,
+  blogUpdate: PropTypes.func,
+  blogRemove: PropTypes.func,
 }
 
 export default Blog
