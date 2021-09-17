@@ -10,22 +10,24 @@ const Blog = ({ blog, blogUpdate, blogRemove, loggedUser }) => {
   }
   const [blogVisible, setBlogVisible] = useState(false)
   let lable = blogVisible ? 'hide' : 'view'
+  const deleteButton = () => {
+    if (blog.user.username === loggedUser.username) {
+      return (
+        <button id='delete-button' style={{ backgroundColor: 'red' }} onClick={() => blogRemove(blog)}>remove</button>
+      )
+    }
+  }
   return (
     <div style={blogStyle}>
       {blog.title} {blog.author} <button className='toggle' onClick={() => setBlogVisible(!blogVisible)}>{lable}</button>
       {blogVisible &&
       <div>
         <a href={blog.url}>{blog.url}</a>
-        <p>likes: {blog.likes}
-          <button onClick={() => blogUpdate({
-            user: blog.user.id,
-            title: blog.title,
-            author: blog.author,
-            likes: (blog.likes += 1)
-          },blog.id)}>like</button>
+        <p className='likecount'>likes: {blog.likes}
+          <button className='like-button' onClick={() => blogUpdate(blog,blog.id)}>like</button>
         </p>
-        <p>{blog.user.username}</p>
-        {blog.user.username === loggedUser.username && <button style={{ backgroundColor: 'red' }} onClick={() => blogRemove(blog)}>remove</button>}
+        <p>{blog.user.name}</p>
+        {deleteButton()}
       </div>}
     </div>
   )

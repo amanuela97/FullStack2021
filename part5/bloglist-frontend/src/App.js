@@ -64,8 +64,13 @@ const App = () => {
 
   const updateBlog = async (updateObject, id) => {
     try {
-      const updatedBlog = await blogService.update(id,updateObject)
-      setUpdate(parseInt(Date.now() * Math.random()))
+      const updated = {
+        user: updateObject.user.id,
+        title: updateObject.title,
+        author: updateObject.author,
+        likes: (updateObject.likes += 1),
+      }
+      const updatedBlog = await blogService.update(id,updated)
       setDefaultError({
         message: `blog ${updateObject.title} was liked`,
         status: updatedBlog.status
@@ -119,7 +124,7 @@ const App = () => {
   }, [])
 
   return (
-    <div>
+    <div className='page-content'>
       <Notification message={errorMessage}/>
       {user === null ?
         <Togglable buttonLabel='login' ref={loginFormRef}>
