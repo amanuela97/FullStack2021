@@ -1,3 +1,6 @@
+import {getAll, createNew ,updateVote} from '../services/anecdoteServices'
+
+
 const anecdotesAtStart = [
   'If it hurts, do it more often',
   'Adding manpower to a late software project makes it later!',
@@ -22,11 +25,9 @@ const initialState = anecdotesAtStart.map(asObject)
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'VOTE':
-      return state.map((anecdote) =>
-        anecdote.id !== action.data.id ? anecdote : { ...anecdote, votes: anecdote.votes + 1 }
-      );
+      return state.map((anecdote) => anecdote.id !== action.data.id ? anecdote : action.data)
     case 'ADD':
-      return [...state, action.data.anecdote]
+      return [...state, action.data]
     case 'INIT_NOTES':
       return action.data
     default:
@@ -34,26 +35,33 @@ const reducer = (state = initialState, action) => {
   }
 }
 
-export const voteAnecdote = (id) => {
-  return {
-    type: 'VOTE',
-    data: {id}
+export const voteAnecdote = (anecdote) => {
+  return async dispatch => {
+    const votedAnecdote = await updateVote(anecdote)
+    dispatch({
+      type: 'VOTE',
+      data: votedAnecdote,
+    })
   }
 }
 
 export const addAnecdote = (content) => {
-    return {
+  return async dispatch => {
+    const anecdote = await createNew(content)
+    dispatch({
       type: 'ADD',
-      data: {
-        anecdote: content
-      }
-    }
+      data: anecdote,
+    })
+  }
 }
 
-export const initializeAnecdotes = (anecdotes) => {
-  return {
-    type: 'INIT_NOTES',
-    data: anecdotes,
+export const initializeAnecdotes = () => {
+  return async dispatch => {
+    const anecdotes = await getAll()
+    dispatch({
+      type: 'INIT_NOTES',
+      data: anecdotes,
+    })
   }
 }
 

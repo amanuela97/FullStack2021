@@ -1,7 +1,7 @@
 const reducer = (state = '', action) => {
     switch (action.type) {
         case 'MESSAGE':
-            return action.data.message
+            return action.data
         case 'RESET':
             return ''    
         default: 
@@ -9,16 +9,18 @@ const reducer = (state = '', action) => {
     }
 }
 
-export const setMessage = (message) => {
-    return {
-        type: 'MESSAGE',
-        data: {message}
-    }
-}
+export const setNotification = (message, time) => {
+    return async dispatch => {
+        dispatch({
+          type: 'MESSAGE',
+          data: message,
+        })
 
-export const resetMessage = () => {
-    return {
-        type: 'RESET',
+        setTimeout(() => {
+            dispatch({
+                type: 'RESET'    
+            })
+        }, time * 1000)
     }
 }
 
