@@ -41,11 +41,12 @@ blogRouter.post('/', async (req, res) => {
   const savedBlog = await blog.save()
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
-  res.status(201).json(savedBlog.toJSON())
+  const blogWithUserInfo = await Blog.findById(savedBlog._id).populate('user', { username: 1, name: 1 })
+  res.status(201).json(blogWithUserInfo.toJSON())
 })
 
 blogRouter.put('/:id', async (req, res) => {
-  const updated = await Blog.findByIdAndUpdate(req.params.id, req.body,{ new: true })
+  const updated = await Blog.findByIdAndUpdate(req.params.id, req.body,{ new: true }).populate('user', { username: 1, name: 1 })
   res.json(updated.toJSON())
 })
 

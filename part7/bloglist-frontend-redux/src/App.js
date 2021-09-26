@@ -1,127 +1,70 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import Blog from './components/Blog'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setNotification } from './reducers/notificationReducer'
+import { initializeBlogs, likeBlog, deleteBlog, createBlog } from './reducers/blogReducer'
+import { setUser, loginUser, logoutUser } from './reducers/userReducer'
+
+
 
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
-  const [update, setUpdate] = useState(null)
+  const [blogs, user] = useSelector(state => [state.blogs, state.user])
   const blogFormRef = useRef()
   const loginFormRef = useRef()
   const dispatch = useDispatch()
 
-  const setDefaultError = (message) => {
+  const setNotif = (message) => {
     dispatch(setNotification(message,5))
   }
 
-  const handleLogin = async (loginObject) => {
-    try {
-      loginFormRef.current.toggleVisibility()
-      const user = await loginService.login(loginObject)
-      window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
-      )
-      blogService.setToken(user.token)
-      setUser(user)
-    } catch (e) {
-      setDefaultError({
-        message: e.response.data.error,
-        status: e.response.status
-      })
-    }
+  const handleLogin = (loginObject) => {
+    loginFormRef.current.toggleVisibility()
+    dispatch(loginUser(loginObject))
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    dispatch(logoutUser())
   }
 
-  const addBlog = async (blogObject) => {
-    try {
-      blogFormRef.current.toggleVisibility()
-      const result = await blogService.create(blogObject)
-      setBlogs(blogs.concat(result))
-      setUpdate(parseInt(Date.now() * Math.random()))
-      setDefaultError({
-        message: `a new blog ${result.title} by ${result.author} added`,
-        status: result.status
-      })
-    } catch (e) {
-      setDefaultError({
-        message: e.response.data.error,
-        status: e.response.status
-      })
-    }
+  const addBlog = (newBlog) => {
+    blogFormRef.current.toggleVisibility()
+    dispatch(createBlog(newBlog))
+    setNotif({
+      message: `a new blog ${newBlog.title} by ${newBlog.author} added`,
+      status: false
+    })
   }
 
-  const updateBlog = async (updateObject, id) => {
-    try {
-      const updated = {
-        user: updateObject.user.id,
-        title: updateObject.title,
-        author: updateObject.author,
-        likes: (updateObject.likes += 1),
-      }
-      const updatedBlog = await blogService.update(id,updated)
-      setDefaultError({
-        message: `blog ${updateObject.title} was liked`,
-        status: updatedBlog.status
-      })
-    } catch (e) {
-      setDefaultError({
-        message: e.response.data.error,
-        status: e.response.status
-      })
-    }
+  const updateBlog = (updateObject) => {
+    dispatch(likeBlog(updateObject))
+    setNotif({
+      message: `blog ${updateObject.title} was liked`,
+      status: false
+    })
   }
 
-  const removeBlog = async (blog) => {
-    try {
-      if (window.confirm(`remove blog ${blog.title}) by ${blog.author}`)) {
-        const deletedBlog = await blogService.remove(blog.id, user.token)
-        setBlogs(blogs.filter((b) => b.id !== blog.id))
-        setUpdate(parseInt(Date.now() * Math.random()))
-        setDefaultError({
-          message: `blog ${blog.title} was deleted`,
-          status: deletedBlog.status
-        })
-      }
-    } catch (e) {
-      setDefaultError({
-        message: e.response.data.error,
-        status: e.response.status
+  const removeBlog = (blog) => {
+    if (window.confirm(`remove blog ${blog.title} by ${blog.author}`)) {
+      dispatch(deleteBlog(blog.id))
+      setNotif({
+        message: `blog ${blog.title} was deleted`,
+        status: false
       })
     }
   }
 
   useEffect(() => {
-    const fetchBlogs = async () => {
-      const result = await blogService.getAll()
-      setBlogs(result)
-    }
-    fetchBlogs()
-  }, [update])
+    dispatch(initializeBlogs())
+  }, [dispatch])
 
   useEffect(() => {
-    try {
-      const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-      if (loggedUserJSON) {
-        const user = JSON.parse(loggedUserJSON)
-        setUser(user)
-        blogService.setToken(user.token)
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
+    dispatch(setUser())
+  }, [dispatch])
 
   return (
     <div className='page-content'>
@@ -135,20 +78,18 @@ const App = () => {
           <p>{user.username} logged in <button onClick={handleLogout}>logout</button></p>
           <h2>create new</h2>
           <Togglable buttonLabel='create new blog' ref={blogFormRef}>
-            <BlogForm createBlog={addBlog}/>
+            <BlogForm  addBlog={addBlog}/>
           </Togglable>
           <br/>
-          {blogs
-            .sort((a, b) => b.likes - a.likes)
-            .map(blog =>
-              <Blog
-                key={blog.id}
-                blog={blog}
-                blogUpdate={updateBlog}
-                blogRemove={removeBlog}
-                loggedUser={user}
-              />
-            )}
+          {blogs.map(blog =>
+            <Blog
+              key={blog.id}
+              loggedUser={user}
+              blog={blog}
+              updateBlog={updateBlog}
+              removeBlog={removeBlog}
+            />
+          )}
         </div>
       }
     </div>
