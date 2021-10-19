@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
+import { TextField, Button, Box } from '@material-ui/core'
 
 const LoginForm = ({ login }) => {
   const [username, setUsername] = useState('')
@@ -17,26 +18,39 @@ const LoginForm = ({ login }) => {
       <h2>Log in to application</h2>
       <form onSubmit={handleLogin}>
         <div>
-          username
-          <input
-            id='username'
+          <TextField
+            id="username"
+            margin="dense"
             type="text"
+            label="username"
+            name='username'
             value={username}
-            name="Username"
+            variant="outlined"
             onChange={({ target }) => setUsername(target.value)}
+            size="small"
           />
         </div>
         <div>
-          password
-          <input
-            id='password'
+          <TextField
+            id="password"
+            margin="dense"
             type="password"
+            label="password"
+            name='password'
             value={password}
-            name="Password"
+            variant="outlined"
             onChange={({ target }) => setPassword(target.value)}
+            size="small"
           />
         </div>
-        <button id='login-button' type="submit">login</button>
+        <Box mt={1} mb={1}>
+          <Button
+            variant='outlined'
+            margin='dense'
+            color='primary'
+            id='create-blog'
+            type="submit">login</Button>
+        </Box>
       </form>
     </div>
   )

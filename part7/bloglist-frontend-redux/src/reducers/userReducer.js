@@ -1,16 +1,23 @@
 import blogService from '../services/blogs'
 import loginService from '../services/login'
+import userService from '../services/users'
 import { setNotification } from './notificationReducer'
 
+const userState = {
+  loggedUser: null,
+  usersList: [],
+}
 
-const userReducer = (state = null, action) => {
+const userReducer = (state = userState, action) => {
   switch(action.type){
   case 'SET_USER':
-    return action.data
-  case 'LOGIN':
-    return action.data
+    return { ...state, loggedUser: action.data }
+  case 'SET_USERS':
+    return { ...state, usersList: action.data }
   case 'LOGOUT':
-    return null
+    return { ...state, loggedUser: null }
+  case 'ADD_USER':
+    return { ...state, userList: [...state.usersList, action.data] }
   default:
     return state
   }
@@ -34,6 +41,52 @@ export const setUser = () => {
   }
 }
 
+export const setUsers = () => {
+  return async dispatch => {
+    try {
+      const users = await userService.getAllUsers()
+      dispatch({
+        type: 'SET_USERS',
+        data: users
+      })
+    } catch (e) {
+      dispatch(setNotification(
+        {
+          message: e.response.data.error,
+          status: e.response.status
+        },
+        5
+      ))
+    }
+  }
+}
+
+export const addUser = (user) => {
+  return async dispatch => {
+    try {
+      const newUser = await userService.addUser(user)
+      dispatch({
+        type: 'ADD_USER',
+        data: newUser
+      })
+      if(newUser.username){
+        dispatch(loginUser({
+          username: newUser.username,
+          password: user.password
+        }))
+      }
+    } catch (e) {
+      dispatch(setNotification(
+        {
+          message: e.response.data.error,
+          status: e.response.status
+        },
+        5
+      ))
+    }
+  }
+}
+
 export const loginUser = (loginObject) => {
   return async dispatch => {
     try {
@@ -42,10 +95,7 @@ export const loginUser = (loginObject) => {
         'loggedBlogappUser', JSON.stringify(user)
       )
       blogService.setToken(user.token)
-      dispatch({
-        type: 'LOGIN',
-        data: user
-      })
+      dispatch(setUser())
     } catch (e) {
       dispatch(setNotification(
         {

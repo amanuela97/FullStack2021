@@ -1,34 +1,46 @@
 import React, { useEffect, useRef } from 'react'
+import Blogs from './components/Blogs'
 import Blog from './components/Blog'
+import User from './components/User'
+import Users from './components/Users'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
+import RegisterForm from './components/RegisterForm'
 import { useDispatch, useSelector } from 'react-redux'
 import { setNotification } from './reducers/notificationReducer'
 import { initializeBlogs, likeBlog, deleteBlog, createBlog } from './reducers/blogReducer'
-import { setUser, loginUser, logoutUser } from './reducers/userReducer'
+import { setUser, loginUser, addUser } from './reducers/userReducer'
+import {
+  BrowserRouter as Router,
+  Switch, Route,
+} from 'react-router-dom'
+import Navigation from './components/Navigation'
 
 
 
 
 const App = () => {
-  const [blogs, user] = useSelector(state => [state.blogs, state.user])
+  const [blogs, user] = useSelector(state => [state.blogs, state.users.loggedUser])
   const blogFormRef = useRef()
   const loginFormRef = useRef()
+  const registerFormRef = useRef()
   const dispatch = useDispatch()
 
   const setNotif = (message) => {
     dispatch(setNotification(message,5))
   }
 
+
   const handleLogin = (loginObject) => {
     loginFormRef.current.toggleVisibility()
     dispatch(loginUser(loginObject))
   }
 
-  const handleLogout = () => {
-    dispatch(logoutUser())
+  const handleRegister = (registerObject) => {
+    registerFormRef.current.toggleVisibility()
+    dispatch(addUser(registerObject))
   }
 
   const addBlog = (newBlog) => {
@@ -68,30 +80,47 @@ const App = () => {
 
   return (
     <div className='page-content'>
-      <Notification />
-      {user === null ?
-        <Togglable buttonLabel='login' ref={loginFormRef}>
-          <LoginForm login={handleLogin}/>
-        </Togglable>:
-        <div>
-          <h2>blogs</h2>
-          <p>{user.username} logged in <button onClick={handleLogout}>logout</button></p>
-          <h2>create new</h2>
-          <Togglable buttonLabel='create new blog' ref={blogFormRef}>
-            <BlogForm  addBlog={addBlog}/>
-          </Togglable>
-          <br/>
-          {blogs.map(blog =>
+      <Router>
+        <Navigation user={user}/>
+        <Notification />
+        <Switch>
+          <Route exact path="/users/:id">
+            <User blogs={blogs}/>
+          </Route>
+          <Route exact path="/blogs/:id">
             <Blog
-              key={blog.id}
-              loggedUser={user}
-              blog={blog}
+              blogs={blogs}
               updateBlog={updateBlog}
               removeBlog={removeBlog}
+              loggedUser={user}
             />
-          )}
-        </div>
-      }
+          </Route>
+          <Route exact path="/users">
+            <Users />
+          </Route>
+          <Route exact path="/">
+            {user === null ?
+              <>
+                <h1>Welcome</h1>
+                <Togglable buttonLabel='login' ref={loginFormRef}>
+                  <LoginForm login={handleLogin}/>
+                </Togglable>
+                <br></br>
+                <Togglable buttonLabel='register' ref={registerFormRef}>
+                  <RegisterForm register={handleRegister}/>
+                </Togglable>
+              </>:
+              <>
+                <h2>blog app</h2>
+                <Togglable buttonLabel='create new blog' ref={blogFormRef}>
+                  <BlogForm  addBlog={addBlog}/>
+                </Togglable>
+                <br/>
+                <Blogs blogs={blogs}/>
+              </>}
+          </Route>
+        </Switch>
+      </Router>
     </div>
   )
 }

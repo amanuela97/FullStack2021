@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
-
+import Alert from '@mui/material/Alert'
+import Stack from '@mui/material/Stack'
 
 const Notification = () => {
   const message = useSelector((store) => store.notification)
@@ -9,9 +10,11 @@ const Notification = () => {
     return null
   }
   return (
-    <div className={message.status ? 'error' : 'success'}>
-      {message.message}
-    </div>
+    <Stack sx={{ width: '100%' }} spacing={2}>
+      <Alert severity={message.status ? 'error' : 'success'}>
+        {message.message}
+      </Alert>
+    </Stack>
   )
 }
 

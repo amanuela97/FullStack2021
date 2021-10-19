@@ -11,6 +11,8 @@ const reducer = (state = [], action) => {
     return state.map(blog => blog.id !== action.data.id ? blog : { ...action.data }).sort(byLike)
   case 'CREATE':
     return [...state, action.data].sort(byLike)
+  case 'COMMENT':
+    return state.map(blog => blog.id !== action.data.id ? blog : action.data).sort(byLike)
   case 'DELETE':
     return state.filter((b) => b.id !== action.id).sort(byLike)
   default:
@@ -90,6 +92,27 @@ export const deleteBlog = (id) => {
       dispatch({
         type: 'DELETE',
         id
+      })
+    } catch (e) {
+      dispatch(setNotification(
+        {
+          message: e.response.data.error,
+          status: e.response.status
+        },
+        5
+      ))
+    }
+
+  }
+}
+
+export const commentBlog = (id, comment) => {
+  return async dispatch => {
+    try {
+      const commentedBlog = await blogServices.comment(id, comment)
+      dispatch({
+        type: 'COMMENT',
+        data: commentedBlog
       })
     } catch (e) {
       dispatch(setNotification(
