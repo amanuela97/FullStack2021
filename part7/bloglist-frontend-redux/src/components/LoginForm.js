@@ -19,7 +19,7 @@ const LoginForm = ({ login }) => {
       <form onSubmit={handleLogin}>
         <div>
           <TextField
-            id="username"
+            id="username2"
             margin="dense"
             type="text"
             label="username"
@@ -32,7 +32,7 @@ const LoginForm = ({ login }) => {
         </div>
         <div>
           <TextField
-            id="password"
+            id="password2"
             margin="dense"
             type="password"
             label="password"
@@ -48,7 +48,7 @@ const LoginForm = ({ login }) => {
             variant='outlined'
             margin='dense'
             color='primary'
-            id='create-blog'
+            id='create-blog2'
             type="submit">login</Button>
         </Box>
       </form>
