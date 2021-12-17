@@ -144,7 +144,7 @@ const resolvers = {
   Mutation: {
     addBook: (_, args) => {
       const book = { ...args, id: uuid() }
-      (!authors.some(author => author.name === args.author)) && (
+      !authors.some(author => author.name === args.author) && (
         authors = authors.concat({
           name: args.author,
           born: null,
