@@ -70,15 +70,30 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (_, args) =>  {
-      return await Book.find({}).populate('author')
-      /*if(!args.author && !args.genre) {
-        return books
+      let author
+      if(args.author){
+        author = await Author.findOne({name: args.author})
+        if(!author) return []
+      } 
+      
+      let param 
+      if(!args.author && !args.genre) {
+        param = {}
       }else if(args.genre && args.author){
-        return books.filter(book => book.author === args.author && book.genres.includes(args.genre))
+        param = {
+          author: author.id,
+          genres: { $elemMatch: { $eq: args.genre } }
+        }
       }else if(!args.genre) {
-        return books.filter(book => book.author === args.author)
+        param = {
+          author: author.id
+        }
+      }else if(!args.author){
+        param = {
+          genres: { $elemMatch: { $eq: args.genre } }
+        }
       }
-      return books.filter(book => book.genres.includes(args.genre))*/
+      return Book.find(param).populate('author')
     },
     allAuthors: async () => await Author.find({}),
   },
@@ -146,22 +161,21 @@ const resolvers = {
       if (!currentUser) {
         throw new AuthenticationError("not authenticated")
       }
-      const author = await Author.findOne({name: args.name})
+      const found = await Author.findOne({name: args.name})
       
-      if(!author){
+      if(!found){
         return null
       }
 
       try {
-        author.born = args.setBornTo
-        await author.save()
+        const author = await Author.findOneAndUpdate({name: args.name}, {born: args.setBornTo}, {new: true})
+        return author
       } catch (error) {
         throw new UserInputError(error.message, {
           invalidArgs: args,
         })
       }
-      return author
-    },
+    }
   }
 }
 
