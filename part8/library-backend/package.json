@@ -22,10 +22,9 @@
   },
   "homepage": "https://github.com/amanuela97/FullStack2021#readme",
   "dependencies": {
-    "apollo-server": "^3.5.0",
-    "apollo-server-core": "^3.5.0",
+    "apollo-server": "^2.24.0",
     "dotenv": "^10.0.0",
-    "graphql": "^16.1.0",
+    "graphql": "^15.5.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.2",
     "mongoose-unique-validator": "^3.0.0",

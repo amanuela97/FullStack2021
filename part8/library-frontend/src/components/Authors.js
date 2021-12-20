@@ -9,7 +9,7 @@ const Authors = ({show, setError, token}) => {
   const authors = useQuery(ALL_AUTHORS)
   const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
     onError: (error) => {
-      setError(error.graphQLErrors[0]?.message)
+      setError({message: error.graphQLErrors[0]?.message, color: 'red'})
     },
     update: (store, response) => {
       const dataInStore = store.readQuery({ query: ALL_AUTHORS })
@@ -27,7 +27,7 @@ const Authors = ({show, setError, token}) => {
   
   useEffect(()=> {
     if(result.data && result.data.editAuthor === null){
-      setError('user not found')
+      setError({message: 'user not found', color: 'red'})
     }
   }, [result]) // eslint-disable-line
 
@@ -39,7 +39,7 @@ const Authors = ({show, setError, token}) => {
     event.preventDefault()
 
     if(!name || !born){
-      setError('you must fill all fields')
+      setError({message: 'you must fill all fields', color: 'red'})
       return null
     }
 

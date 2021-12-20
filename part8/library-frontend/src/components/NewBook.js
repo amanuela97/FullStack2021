@@ -12,7 +12,7 @@ const NewBook = ({show, setError}) => {
   const [ addBook ] = useMutation(ADD_BOOK, {
     refetchQueries: [ { query: ALL_BOOKS }, { query:  ALL_AUTHORS} ],
     onError: (error) => {
-      setError(error.graphQLErrors[0]?.message)
+      setError({message: error.graphQLErrors[0]?.message, color: 'red'})
     },
   })
 
@@ -25,7 +25,7 @@ const NewBook = ({show, setError}) => {
     event.preventDefault()
     
     if(!title || !published || !author || genres.length === 0){
-      setError('you must fill all fields')
+      setError({message: 'you must fill all fields', color: 'red'})
       return null
     }
     console.log('add book...')

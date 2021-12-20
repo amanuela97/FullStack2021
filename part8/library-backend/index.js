@@ -1,10 +1,12 @@
-const { ApolloServer, gql, UserInputError, AuthenticationError } = require('apollo-server')
+const { ApolloServer, gql, UserInputError, AuthenticationError, PubSub  } = require('apollo-server')
 const mongoose = require('mongoose')
 const config = require('./config')
 const Author = require('./models/Author')
 const Book = require('./models/Book')
 const User = require('./models/User')
 const jwt = require('jsonwebtoken')
+
+const pubsub = new PubSub()
 
 mongoose.connect(config.DB_URL, config.options).then(() => {
     console.log('connected to MongoDB')
@@ -62,14 +64,18 @@ const typeDefs = gql`
       password: String!
     ): Token
   }
+
+ type Subscription {
+   bookAdded: Book!
+ }
 `
 
 const resolvers = {
   Query: {
-    me: async (_, __, context) => context.currentUser,
+    me: async (root, args, context) => context.currentUser,
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
-    allBooks: async (_, args) =>  {
+    allBooks: async (root, args) =>  {
       let author
       if(args.author){
         author = await Author.findOne({name: args.author})
@@ -98,7 +104,7 @@ const resolvers = {
     allAuthors: async () => await Author.find({}),
   },
   Mutation: {
-    login:  async (_, args) => {
+    login:  async (root, args) => {
       const user = await User.findOne({username: args.username})
 
       if ( !user || args.password !== 'secret' ) {
@@ -112,7 +118,7 @@ const resolvers = {
   
       return { value: jwt.sign(userForToken, config.JWT_SECRET, { expiresIn: 60*60 }) }
     },
-    createUser: async (_, args) => {
+    createUser: async (root, args) => {
       const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre})
   
       try {
@@ -124,7 +130,7 @@ const resolvers = {
       }
       return user
     },
-    addBook: async (_, args, {currentUser}) => {
+    addBook: async (root, args, {currentUser}) => {
       if (!currentUser) {
         throw new AuthenticationError("not authenticated")
       }
@@ -154,10 +160,12 @@ const resolvers = {
           invalidArgs: args,
         })
       }
+      
+      pubsub.publish('BOOK_ADDED', {bookAdded: book})
 
       return book
     },
-    editAuthor: async (_, args, {currentUser}) => {
+    editAuthor: async (root, args, {currentUser}) => {
       if (!currentUser) {
         throw new AuthenticationError("not authenticated")
       }
@@ -175,6 +183,11 @@ const resolvers = {
           invalidArgs: args,
         })
       }
+    }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED']),
     }
   }
 }
@@ -194,6 +207,7 @@ const server = new ApolloServer({
   },
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`)
 })

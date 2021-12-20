@@ -3,9 +3,11 @@ import ReactDOM from 'react-dom'
 import App from './App'
 import {decode} from 'jsonwebtoken'
 import { 
-    ApolloClient, ApolloProvider, HttpLink, InMemoryCache
+    ApolloClient, ApolloProvider, HttpLink, InMemoryCache, split
   } from '@apollo/client' 
 import { setContext } from '@apollo/client/link/context'
+import { getMainDefinition } from '@apollo/client/utilities'
+import { WebSocketLink } from '@apollo/client/link/ws'
 require('dotenv').config()
 
 const refreshToken = async (username) => {
@@ -57,9 +59,28 @@ const authLink = setContext( async (_, { headers }) => {
 
 const httpLink = new HttpLink({ uri: process.env.REACT_APP_URL })
 
+const wsLink = new WebSocketLink({
+  uri: process.env.REACT_APP_Socket_URL,
+  options: {
+    reconnect: true
+  }
+})
+
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query)
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  authLink.concat(httpLink),
+)
+
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  link: authLink.concat(httpLink)
+  link: splitLink
 })
   
 ReactDOM.render(

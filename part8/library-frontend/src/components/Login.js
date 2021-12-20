@@ -8,7 +8,7 @@ const Login = ({ show, setError, setToken, setPage }) => {
   
     const [ login, result ] = useMutation(LOGIN, {
       onError: (error) => {
-        setError(error.graphQLErrors[0]?.message)
+        setError({message: error.graphQLErrors[0]?.message, color: 'red'})
       }
     })
 

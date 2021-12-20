@@ -6,7 +6,7 @@ const schema = new mongoose.Schema({
         type: String,
         unique: true,
         required: true,
-        minlength: [4, 'Auhtor name must have atleast 4 characters'],
+        minlength: [2, 'Auhtor name must have atleast 2 characters'],
     },
     born: {
         type: Number,
