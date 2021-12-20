@@ -5,7 +5,7 @@ const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 }
-const JWT_SECRET = 'SECRET'
+const JWT_SECRET = process.env.SECRET
 module.exports = {
     DB_URL,
     options,
