@@ -1,4 +1,3 @@
-
 const calculateBmi = (height: number, weight: number): String => {
 
     if(isNaN(height)) return 'provide a valid height'
@@ -22,4 +21,5 @@ const calculateBmi = (height: number, weight: number): String => {
     return result
 }
 
-console.log(calculateBmi(180, 70))
+
+console.log(calculateBmi(Number(process.argv[2]), Number(process.argv[3])))

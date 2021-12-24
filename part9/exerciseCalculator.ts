@@ -10,6 +10,14 @@ interface Result{
 
 
 const calculateExercises  = (dailyExercises: Array<number>, target: number): Result => {
+    if(dailyExercises.length === 0) throw new Error('exercises not provided') 
+    if(isNaN(target) || !target) throw new Error('invalid target value provided')
+    dailyExercises.forEach(e => {
+        if(isNaN(e)){
+            throw new Error('invalid input provided')
+        }
+    })
+
     const periodLength = dailyExercises.length
     const trainingDays = dailyExercises.filter(exercise => exercise !== 0).length
     const sum = dailyExercises.reduce((a,b) => a + b, 0)
@@ -26,7 +34,7 @@ const calculateExercises  = (dailyExercises: Array<number>, target: number): Res
         ratingDescription = 'not too bad but could be better'
     }else {
         rating = 1
-        ratingDescription = 'target was not close! more effort is needed'
+        ratingDescription = 'target was not close! more effort could be put'
     }
     return {
         periodLength,
@@ -38,5 +46,20 @@ const calculateExercises  = (dailyExercises: Array<number>, target: number): Res
         average: avg,
     }
 }
+const target: number = Number(process.argv[2])
+const dailyExercises: Array<number> = []
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2))
+for(let i = 3; i < process.argv.length; i++){
+    dailyExercises.push(Number(process.argv[i]))
+}
+
+try {
+    console.log(target)
+    console.log(calculateExercises(dailyExercises, target))  
+} catch (error: unknown) {
+    let errorMessage = 'An error has occured.'
+    if (error instanceof Error) {
+        errorMessage += ' Error: ' + error.message;
+    }
+    console.log(errorMessage);
+}
