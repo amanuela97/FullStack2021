@@ -1,10 +1,13 @@
-const calculateBmi = (height: number, weight: number): String => {
+interface Response {
+    weight: number,
+    height: number,
+    bmi: string
+}
 
-    if(isNaN(height)) return 'provide a valid height'
-    if(isNaN(weight)) return 'provide a valid weight'
 
+export const calculateBmi = (height: number, weight: number): Response => {
     const bmi = Number((weight / Math.pow((height / 100),2)).toFixed(1))
-    let result: String = ''
+    let result: string = ''
     if(bmi < 18.5) {
         result = `Underweight (${height} ${weight})`
     }else if(bmi >= 18.5 && bmi < 25){
@@ -18,8 +21,12 @@ const calculateBmi = (height: number, weight: number): String => {
     }else {
         result = `Obesity class 3 (${height} ${weight})` 
     }
-    return result
+    return {
+        weight,
+        height,
+        bmi: result
+    }
 }
 
 
-console.log(calculateBmi(Number(process.argv[2]), Number(process.argv[3])))
+//console.log(calculateBmi(Number(process.argv[2]), Number(process.argv[3])))
