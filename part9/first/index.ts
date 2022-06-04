@@ -26,7 +26,7 @@ app.get('/bmi', (req, res) => {
 
 app.post('/exercises', (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const {daily_exercises,target}: any = req.body;
+    const {daily_exercises,target} = req.body;
 
     if(!target || !daily_exercises){
         res.status(400).send({
@@ -35,13 +35,16 @@ app.post('/exercises', (req, res) => {
         return;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if(isNaN(Number(target)) || !Array.isArray(daily_exercises) || daily_exercises.some( (e: any) => typeof e !== 'number')){
+    if(isNaN(Number(target)) || !Array.isArray(daily_exercises) || daily_exercises.some( (day: any) => typeof day !== 'number')){
         res.status(400).send({
             error: 'malformatted parameters'
         });
         return;
     }
-    const result = calculateExercises(daily_exercises, Number(target));
+
+    const dailyExercises = daily_exercises.map(day => Number(day));
+    const targetNew =  Number(target);
+    const result = calculateExercises(dailyExercises, targetNew);
     res.status(200).json(result);
 
 });

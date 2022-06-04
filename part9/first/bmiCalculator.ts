@@ -29,4 +29,4 @@ export const calculateBmi = (height: number, weight: number): Response => {
 };
 
 
-//console.log(calculateBmi(Number(process.argv[2]), Number(process.argv[3])))
+//console.log(calculateBmi(Number(process.argv[2]), Number(process.argv[3])));
