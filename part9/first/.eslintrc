@@ -23,6 +23,6 @@
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-      "project": "./tsconfig.json"
+      "project": "part9/first/tsconfig.json"
     }
 }
