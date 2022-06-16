@@ -10,12 +10,11 @@ router.get('/', (_req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  const id = req.params.id;
-  const entry = patientService.getEntryById(id);
+  const entry = patientService.getEntryById(req.params.id);
   if(entry) {
     res.status(200).send(entry);
   }else {
-    res.status(404).send(`Patient with ${id} was not found`);
+    res.status(404).send(`Patient with ${req.params.id} was not found`);
   }
 });
 

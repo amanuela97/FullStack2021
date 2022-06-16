@@ -1,19 +1,36 @@
-import { NewPatient, Gender } from './types';
+import { NewPatient, Gender, Entry } from './types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const toNewPatientEntry = ({ name, dateOfBirth, ssn, gender, occupation }: any): NewPatient => {
+const toNewPatientEntry = ({ name, dateOfBirth, ssn, gender, occupation, entries }: any): NewPatient => {
   const newEntry: NewPatient = {
     name: parseName(name),
     dateOfBirth: parseDateOfBirth(dateOfBirth),
     ssn: parseSsn(ssn),
     gender: parseGender(gender),
     occupation: parseOccupation(occupation),
-    entries: [],
+    entries: parseEntries(entries) || [],
     };
 
   return newEntry;
 };
 
+const isEntry = (entry: any):  entry is Entry  => {
+  if(!isString(entry.type)) return false;
+  return ["HealthCheck","Hospital","OccupationalHealthcare"].includes(entry.type as string);
+};
+
+const parseEntries = (entries: any): Entry[] => {
+  let isEntryType = false;
+  for (const entry of entries) {
+    if(!isEntry(entry)){
+      isEntryType = true;
+    }
+  }
+  if(!entries || isEntryType){
+    throw new Error('Incorrect or missing entries: ' +  entries);
+  }
+  return entries as Entry[];
+};
 
 const parseName = (name: any): string => {
     if (!name || !isString(name)) {
