@@ -1,6 +1,6 @@
 import { Diagnosis } from "../src/types";
 
-const diaryEntries: Diagnosis[] = [
+const diagnoses: Diagnosis[] = [
     {
       "code": "M24.2",
       "name": "Disorder of ligament",
@@ -84,4 +84,4 @@ const diaryEntries: Diagnosis[] = [
     }
 ];
 
-export default diaryEntries;
+export default diagnoses;

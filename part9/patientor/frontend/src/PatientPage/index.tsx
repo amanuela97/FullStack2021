@@ -10,7 +10,7 @@ import { FaGenderless } from 'react-icons/fa';
 import { setPatient } from "../state/reducer";
 
 const PatientPage = () => {
-    const [{ patient }, dispatch] = useStateValue();
+    const [{ patient, diagnoses }, dispatch] = useStateValue();
     const { id } = useParams<{ id: string }>();
     const style = {"marginTop": "15px"};
 
@@ -65,7 +65,7 @@ const PatientPage = () => {
                     <Typography variant='body1'>{entry?.date} {entry?.description}</Typography>
                     <div style={{...style, "marginLeft": "20px"}}>
                       <ul>
-                        {entry?.diagnosisCodes?.map(code => <li key={code}>{code}</li>)}
+                        {entry?.diagnosisCodes?.map(code => <li key={code}>{code}; {diagnoses[code].name}</li>)}
                       </ul>
                     </div> 
                 </div>
