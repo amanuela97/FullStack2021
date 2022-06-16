@@ -44,6 +44,8 @@ const PatientPage = () => {
     };
 
 
+
+
     return (
         <div>
           <div style={{...style, "display": "flex", "flexDirection": "row"}}>
@@ -53,6 +55,21 @@ const PatientPage = () => {
           <div style={style}>
             <Typography variant='body1'>ssn: {patient?.ssn}</Typography> 
             <Typography variant='body1'>occupation: {patient?.occupation}</Typography> 
+          </div>
+          <div style={style}>
+            <Typography variant='h6'>entries</Typography>
+          </div>
+          <div style={style}>
+            {patient?.entries.map(entry => 
+                <div key={entry.id}>
+                    <Typography variant='body1'>{entry?.date} {entry?.description}</Typography>
+                    <div style={{...style, "marginLeft": "20px"}}>
+                      <ul>
+                        {entry?.diagnosisCodes?.map(code => <li key={code}>{code}</li>)}
+                      </ul>
+                    </div> 
+                </div>
+            )}
           </div>
         </div>
     );
