@@ -91,9 +91,9 @@ const PatientListPage = () => {
         error={error}
         onClose={closeModal}
       />
-      <Button variant="contained" onClick={() => openModal()}>
-        Add New Patient
-      </Button>
+        <Button variant="contained" onClick={() => openModal()}>
+          Add New Patient
+        </Button>
     </div>
   );
 };
