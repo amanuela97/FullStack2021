@@ -1,18 +1,25 @@
-import React from "react";
-import axios from "axios";
-import { Box, Table, Button, TableHead, Typography, Link } from "@material-ui/core";
+import React from 'react';
+import axios from 'axios';
+import {
+  Box,
+  Table,
+  Button,
+  TableHead,
+  Typography,
+  Link,
+} from '@material-ui/core';
 
-import { PatientFormValues } from "../AddPatientModal/AddPatientForm";
-import AddPatientModal from "../AddPatientModal";
-import { Patient } from "../types";
-import { apiBaseUrl } from "../constants";
-import HealthRatingBar from "../components/HealthRatingBar";
-import { useStateValue } from "../state";
-import { TableCell } from "@material-ui/core";
-import { TableRow } from "@material-ui/core";
-import { TableBody } from "@material-ui/core";
-import { useNavigate } from "react-router-dom";
-import { addPatient } from "../state/reducer";
+import { PatientFormValues } from '../AddPatientModal/AddPatientForm';
+import AddPatientModal from '../AddPatientModal';
+import { Patient } from '../types';
+import { apiBaseUrl } from '../constants';
+import HealthRatingBar from '../components/HealthRatingBar';
+import { useStateValue } from '../state';
+import { TableCell } from '@material-ui/core';
+import { TableRow } from '@material-ui/core';
+import { TableBody } from '@material-ui/core';
+import { useNavigate } from 'react-router-dom';
+import { addPatient } from '../state/reducer';
 
 const PatientListPage = () => {
   const [{ patients }, dispatch] = useStateValue();
@@ -21,12 +28,11 @@ const PatientListPage = () => {
   const [error, setError] = React.useState<string>();
   const navigate = useNavigate();
 
-
   const openModal = (): void => setModalOpen(true);
 
   const closeModal = (): void => {
     setModalOpen(false);
-    setError(undefined);
+    setError('');
   };
 
   const submitNewPatient = async (values: PatientFormValues) => {
@@ -39,15 +45,16 @@ const PatientListPage = () => {
       closeModal();
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
-        console.error(e?.response?.data || "Unrecognized axios error");
-        setError(String(e?.response?.data?.error) || "Unrecognized axios error");
+        console.error(e?.response?.data || 'Unrecognized axios error');
+        setError(
+          String(e?.response?.data?.error) || 'Unrecognized axios error'
+        );
       } else {
-        console.error("Unknown error", e);
-        setError("Unknown error");
+        console.error('Unknown error', e);
+        setError('Unknown error');
       }
     }
   };
-
 
   return (
     <div className="App">
@@ -56,7 +63,7 @@ const PatientListPage = () => {
           Patient list
         </Typography>
       </Box>
-      <Table style={{ marginBottom: "1em" }}>
+      <Table style={{ marginBottom: '1em' }}>
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
@@ -69,11 +76,14 @@ const PatientListPage = () => {
           {Object.values(patients).map((patient: Patient) => (
             <TableRow key={patient.id}>
               <TableCell>
-                <Link 
+                <Link
                   component="button"
-                  variant="body2" 
-                  onClick={() => navigate(`patients/${patient.id}`, { replace: false })}>
-                    {patient.name}
+                  variant="body2"
+                  onClick={() =>
+                    navigate(`patients/${patient.id}`, { replace: false })
+                  }
+                >
+                  {patient.name}
                 </Link>
               </TableCell>
               <TableCell>{patient.gender}</TableCell>
@@ -91,9 +101,9 @@ const PatientListPage = () => {
         error={error}
         onClose={closeModal}
       />
-        <Button variant="contained" onClick={() => openModal()}>
-          Add New Patient
-        </Button>
+      <Button variant="contained" onClick={() => openModal()}>
+        Add New Patient
+      </Button>
     </div>
   );
 };

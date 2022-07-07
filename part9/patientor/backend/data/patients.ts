@@ -112,6 +112,4 @@ const patients: Patient[] = [
   },
 ];
 
-
-
 export default patients;
